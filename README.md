@@ -278,17 +278,20 @@ AI-Medical-Assistant/
 
 ---
 
+<div align="center">
 ## 👩‍💻 Author
 
-**Shruti Devganiya**
-
-GitHub
+**Shruti Devganiya** 
+</div>
 
 ---
 
+<div align="center">
 ## 📄 License
 
 This project is licensed under the MIT License see the LICENSE file for details.
+
+</div>
 
 ---
 
