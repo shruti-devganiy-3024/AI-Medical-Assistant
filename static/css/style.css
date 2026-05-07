@@ -1,0 +1,1391 @@
+/* =========================================================
+   THEME VARIABLES (Light + Dark mode)
+   ========================================================= */
+:root {
+  --primary: #0d9488;        /* teal */
+  --primary-dark: #0f766e;
+  --primary-light: #ccfbf1;
+  --accent: #2563eb;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --radius: 10px;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-2: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --primary-light: #134e4a;
+}
+
+/* =========================================================
+   RESET + GLOBAL
+   ========================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  transition: background 0.2s, color 0.2s;
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+.navbar .brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.nav-links a {
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.nav-links a:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-links a.active {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.theme-toggle {
+  background: var(--surface-2);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.mobile-toggle {
+  display: none;
+  background: transparent;
+  font-size: 22px;
+  color: var(--text);
+}
+
+/* =========================================================
+   CONTAINER + CARDS
+   ========================================================= */
+.container {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+
+h1 { font-size: 28px; margin-bottom: 12px; }
+h2 { font-size: 22px; margin-bottom: 12px; }
+h3 { font-size: 18px; margin-bottom: 10px; }
+p  { color: var(--text-muted); }
+
+/* =========================================================
+   FORMS + BUTTONS
+   ========================================================= */
+.form-group { margin-bottom: 14px; }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+textarea { resize: vertical; min-height: 80px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  transition: all 0.15s;
+}
+
+.btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.btn-secondary:hover { background: var(--border); }
+
+.btn-danger { background: var(--error); }
+.btn-danger:hover { background: #b91c1c; }
+
+.btn-block { width: 100%; }
+
+.btn-large { padding: 14px 28px; font-size: 16px; }
+
+/* =========================================================
+   AUTH PAGE
+   ========================================================= */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #0d9488 0%, #2563eb 100%);
+}
+
+.auth-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-card h1 {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.auth-card .subtitle {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.auth-tabs {
+  display: flex;
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 22px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.auth-tab.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: var(--shadow);
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+.hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white;
+  padding: 50px 30px;
+  border-radius: var(--radius);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.hero h1 { color: white; font-size: 34px; }
+.hero p { color: rgba(255,255,255,0.9); margin: 12px 0 24px; font-size: 16px; }
+
+.hero .btn {
+  background: white;
+  color: var(--primary);
+  font-weight: 700;
+}
+.hero .btn:hover { background: #f0fdfa; }
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.service-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  text-align: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.service-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+.service-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.contact-row:last-child { border-bottom: none; }
+
+/* =========================================================
+   CHAT PAGE
+   ========================================================= */
+.chat-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 18px;
+  height: calc(100vh - 130px);
+}
+
+.chat-sidebar {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+}
+
+.chat-sidebar h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.history-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.history-item:hover { background: var(--surface-2); border-left-color: var(--primary); }
+.history-item .preview { color: var(--text-muted); font-size: 12px; margin-top: 3px; }
+
+.chat-window {
+  background: var(--surface);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  animation: fadeUp 0.25s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bubble.user {
+  background: var(--primary);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble.bot {
+  background: var(--surface-2);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble .time {
+  display: block;
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.typing {
+  display: flex;
+  gap: 4px;
+  padding: 14px 18px;
+  background: var(--surface-2);
+  border-radius: 16px;
+  align-self: flex-start;
+  width: fit-content;
+}
+
+.typing span {
+  width: 7px;
+  height: 7px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-6px); opacity: 1; }
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.chat-input input { flex: 1; }
+
+.action-prompt {
+  align-self: flex-start;
+  background: var(--primary-light);
+  padding: 14px 18px;
+  border-radius: 12px;
+  border-left: 4px solid var(--primary);
+}
+
+.action-prompt p { color: var(--text); font-weight: 600; margin-bottom: 10px; }
+
+.action-buttons { display: flex; gap: 8px; }
+
+/* =========================================================
+   APPOINTMENT
+   ========================================================= */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* =========================================================
+   HISTORY PAGE
+   ========================================================= */
+.history-list { display: flex; flex-direction: column; gap: 12px; }
+
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.history-card .meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.history-card .user-msg {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.history-card .bot-msg {
+  background: var(--surface-2);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* =========================================================
+   ALERTS / TOASTS
+   ========================================================= */
+.alert {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  display: none;
+}
+.alert.show { display: block; }
+.alert-error   { background: #fee2e2; color: var(--error); border: 1px solid #fecaca; }
+.alert-success { background: #d1fae5; color: var(--success); border: 1px solid #a7f3d0; }
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--surface);
+  padding: 14px 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--primary);
+  z-index: 1000;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+.toast.success { border-left-color: var(--success); }
+.toast.error   { border-left-color: var(--error); }
+
+@keyframes slideIn {
+  from { transform: translateX(120%); }
+  to   { transform: translateX(0); }
+}
+
+/* =========================================================
+   LOADING SPINNER
+   ========================================================= */
+
+.error-box {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #fca5a5;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+.loading-overlay.show { display: flex; }
+.loading-overlay .box {
+  background: var(--surface);
+  padding: 28px 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 600;
+}
+.loading-overlay .spinner {
+  border-color: rgba(0,0,0,0.15);
+  border-top-color: var(--primary);
+  width: 22px; height: 22px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .chat-layout { grid-template-columns: 1fr; height: auto; }
+  .chat-sidebar { max-height: 200px; }
+  .chat-window { height: 70vh; }
+  .form-row { grid-template-columns: 1fr; }
+
+  .mobile-toggle { display: block; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: var(--surface);
+    flex-direction: column;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+  }
+  .nav-links.show { display: flex; }
+}
+/* =========================================================
+   ANALYZING INDICATOR
+   (replaces typing dots after 700ms)
+   ========================================================= */
+.analyzing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--surface-2);
+  border-radius: 16px;
+  align-self: flex-start;
+  width: fit-content;
+  border-bottom-left-radius: 4px;
+}
+
+.analyzing-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+/* =========================================================
+   BUBBLE TEXT (allows bold formatting)
+   ========================================================= */
+.bubble-text {
+  display: block;
+  white-space: pre-wrap;   /* preserves newlines from bot replies */
+  word-break: break-word;
+}
+
+/* =========================================================
+   SIDEBAR IMPROVEMENTS
+   ========================================================= */
+.sidebar-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+  line-height: 1.6;
+}
+
+.history-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* Active chat highlighted in sidebar */
+.history-item.active {
+  background: rgba(13,148,136,0.12);
+  border: 1px solid rgba(13,148,136,0.45);
+}
+
+.history-item {
+  background: transparent !important;
+  border: 1px solid rgba(13,148,136,0.25);   /* teal border */
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: all 0.2s ease;
+}
+
+/* hover */
+.history-item:hover {
+  background: rgba(13,148,136,0.08);
+}
+
+/* ACTIVE  */
+.history-item.active {
+  background: rgba(13,148,136,0.15);  
+  border: 1px solid rgba(13,148,136,0.3);
+}
+
+.history-item.active .history-title {
+  color: var(--primary-dark);
+}
+/* =========================================================
+   SIDEBAR: Chat item header (title + delete button)
+   ========================================================= */
+.history-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.history-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  flex: 1;
+}
+
+/* =========================================================
+   SIDEBAR: Delete button
+   ========================================================= */
+.delete-chat-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0;                   /* hidden by default */
+  transition: opacity 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+/* Show delete button on hover */
+.history-item:hover .delete-chat-btn {
+  opacity: 1;
+}
+
+.delete-chat-btn:hover {
+  background: rgba(220, 38, 38, 0.12);
+}
+
+/* =========================================================
+   SIDEBAR: Date + preview text
+   ========================================================= */
+.history-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.history-preview {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 230px;
+}
+
+/* =========================================================
+   SIDEBAR: Active chat item
+   ========================================================= */
+.history-item.active {
+  background: var(--primary-light);
+  border-left-color: var(--primary);
+}
+
+.history-item.active .history-title {
+  color: var(--primary-dark);
+}
+
+.history-item.active .history-date,
+.history-item.active .history-preview {
+  color: var(--primary-dark);
+  opacity: 0.75;
+}
+
+/* =========================================================
+   SIDEBAR: Empty state
+   ========================================================= */
+.sidebar-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 8px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   ANALYZING INDICATOR
+   ========================================================= */
+.analyzing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--surface-2);
+  border-radius: 16px;
+  align-self: flex-start;
+  width: fit-content;
+  border-bottom-left-radius: 4px;
+}
+
+.analyzing-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* =========================================================
+   BUBBLE: Preserve newlines + allow bold
+   ========================================================= */
+.bubble-text {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+}
+/* =========================================================
+   DELETE BUTTON (SVG icon, no emoji)
+   ========================================================= */
+.delete-chat-btn {
+  background  : transparent;
+  border      : none;
+  cursor      : pointer;
+  padding     : 4px 5px;
+  border-radius: 5px;
+  color       : var(--text-muted);
+  opacity     : 0;                    /* hidden until hover */
+  transition  : opacity 0.15s, background 0.15s, color 0.15s;
+  display     : flex;
+  align-items : center;
+  justify-content: center;
+  flex-shrink : 0;
+  line-height : 1;
+}
+
+/* Show on sidebar item hover */
+.history-item:hover .delete-chat-btn {
+  opacity: 1;
+}
+
+/* Red on button hover */
+.delete-chat-btn:hover {
+  background: rgba(220, 38, 38, 0.10);
+  color     : var(--error);
+}
+
+/* =========================================================
+   BOOKING PROMPT (polished)
+   ========================================================= */
+.action-prompt {
+  align-self    : flex-start;
+  background    : var(--surface);
+  border        : 1px solid var(--border);
+  border-left   : 4px solid var(--primary);
+  padding       : 16px 18px;
+  border-radius : 12px;
+  max-width     : 90%;
+  animation     : fadeUp 0.3s ease;
+  box-shadow    : var(--shadow);
+}
+
+.booking-prompt-inner {
+  display    : flex;
+  align-items: flex-start;
+  gap        : 10px;
+  margin-bottom: 12px;
+}
+
+.booking-prompt-icon {
+  font-size  : 22px;
+  line-height: 1;
+  margin-top : 2px;
+}
+
+.booking-prompt-title {
+  font-weight : 700;
+  font-size   : 14px;
+  color       : var(--text);
+  margin      : 0 0 3px 0;
+}
+
+.booking-prompt-sub {
+  font-size   : 12px;
+  color       : var(--text-muted);
+  margin      : 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap    : 8px;
+  flex-wrap: wrap;
+}
+
+.booking-yes-btn {
+  font-size  : 13px;
+  padding    : 8px 16px;
+  background : var(--primary);
+  color      : white;
+}
+
+.booking-yes-btn:hover {
+  background: var(--primary-dark);
+}
+
+.booking-no-btn {
+  font-size : 13px;
+  padding   : 8px 16px;
+}
+
+/* =========================================================
+   BUBBLE: Preserve newlines + bold markdown
+   ========================================================= */
+.bubble-text {
+  display    : block;
+  white-space: pre-wrap;
+  word-break : break-word;
+  line-height: 1.65;
+}
+/* ==========================================================
+   HISTORY PAGE — reuses .chat-sidebar + .history-item
+   Only NEW things added here, zero existing styles touched
+   ========================================================== */
+
+/* Centers the sidebar panel on the page */
+.hist-center-wrap {
+  display        : flex;
+  justify-content: center;
+  padding        : 12px 0 40px;
+}
+
+/* Make the panel wider + remove fixed height constraint */
+.hist-panel {
+  width     : 100%;
+  max-width : 640px;    /* comfortable reading width */
+  max-height: none;     /* chat sidebar has max-height, remove it */
+  overflow-y: visible;  /* let page scroll instead */
+}
+
+/* Search bar inside the panel */
+.hist-search-bar {
+  position: relative;              /* keep */
+  background   : var(--surface-2);
+  border       : 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition   : border-color .2s, box-shadow .2s;
+}
+
+/* focus effect */
+.hist-search-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow  : 0 0 0 3px rgba(13,148,136,.1);
+}
+
+/* INPUT */
+.hist-search-bar input {
+  width: 100%;
+  padding: 10px 36px 10px 34px;   /* 👈 IMPORTANT */
+  border    : none;
+  background: transparent;
+  font-size : 13px;
+  color     : var(--text);
+  outline   : none;
+  box-shadow: none;
+}
+
+/* placeholder */
+.hist-search-bar input::placeholder {
+  color: var(--text-muted);
+}
+
+/* 🔍 LEFT ICON */
+.hist-search-bar svg:first-child {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+/* ❌ RIGHT BUTTON */
+.hist-search-bar button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background : transparent;
+  border     : none;
+  cursor     : pointer;
+  color      : var(--text-muted);
+  display    : none;   /* JS handle karega */
+}
+
+/* hover */
+.hist-search-bar button:hover {
+  color: var(--text);
+}
+
+/* Conversation count label */
+.hist-count-label {
+  font-size    : 11px;
+  color        : var(--text-muted);
+  margin       : 0 0 8px 2px;
+  letter-spacing: .2px;
+}
+
+/* Title inside each .history-item */
+.hist-item-title {
+  display      : block;
+  font-size    : 13px;
+  font-weight  : 600;
+  color        : var(--text);
+  white-space  : nowrap;
+  overflow     : hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+/* Preview line — truncate to 1 line */
+.hist-item-preview {
+  white-space  : nowrap;
+  overflow     : hidden;
+  text-overflow: ellipsis;
+  max-width    : 100%;
+}
+
+/* Actions row at bottom of each card */
+.hist-item-actions {
+  display    : flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap        : 6px;
+  margin-top : 8px;
+}
+
+/* Open button — reuses .btn, just size override */
+.hist-open-btn { line-height: 1; }
+
+/* Delete icon button */
+.hist-del-btn {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  width          : 26px;
+  height         : 26px;
+  border-radius  : 6px;
+  background     : transparent;
+  border         : 1px solid transparent;
+  color          : var(--text-muted);
+  cursor         : pointer;
+  transition     : background .15s, color .15s, border-color .15s;
+  flex-shrink    : 0;
+  padding        : 0;
+}
+
+.hist-del-btn:hover {
+  background  : rgba(220,38,38,.08);
+  color       : var(--error);
+  border-color: rgba(220,38,38,.15);
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .hist-panel           { max-width: 100%; }
+  .hist-item-preview    { display: none; }
+}
+/* ==========================================================
+   APPOINTMENT PAGE
+   ========================================================== */
+
+/* ── Main layout ─────────────────────────────────────────── */
+.apt-wrap {
+  display              : grid;
+  grid-template-columns: 1fr 320px;
+  gap                  : 20px;
+  align-items          : start;
+}
+
+/* ── Form card ───────────────────────────────────────────── */
+.apt-form-card {
+  padding: 28px;
+}
+
+.apt-form-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Section labels */
+.apt-section-label {
+  font-size    : 11px;
+  font-weight  : 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color        : var(--text-muted);
+  margin       : 20px 0 10px;
+}
+
+/* Required star */
+.req { color: var(--error); margin-left: 2px; }
+
+/* Hint text below inputs */
+.apt-hint {
+  font-size : 12px;
+  color     : var(--text-muted);
+  margin    : 5px 0 0;
+}
+
+/* ── Emergency checkbox ──────────────────────────────────── */
+.apt-emergency-row {
+  margin: 14px 0;
+}
+
+.apt-emergency-label {
+  display    : flex;
+  align-items: flex-start;
+  gap        : 10px;
+  cursor     : pointer;
+}
+
+.apt-emergency-label input[type="checkbox"] {
+  display: none;
+}
+
+.apt-emergency-box {
+  width        : 18px;
+  height       : 18px;
+  border       : 2px solid var(--border);
+  border-radius: 4px;
+  flex-shrink  : 0;
+  margin-top   : 2px;
+  transition   : background .15s, border-color .15s;
+  display      : flex;
+  align-items  : center;
+  justify-content: center;
+}
+
+.apt-emergency-label input:checked + .apt-emergency-box {
+  background  : var(--primary);
+  border-color: var(--primary);
+}
+
+.apt-emergency-label input:checked + .apt-emergency-box::after {
+  content    : '✓';
+  color      : white;
+  font-size  : 12px;
+  font-weight: 700;
+}
+
+.apt-emergency-text {
+  display       : flex;
+  flex-direction: column;
+  gap           : 2px;
+  font-size     : 14px;
+  font-weight   : 600;
+  color         : var(--text);
+}
+
+.apt-emergency-text small {
+  font-size : 12px;
+  font-weight: 400;
+  color     : var(--text-muted);
+}
+
+/* ── Time slots grid ─────────────────────────────────────── */
+.apt-slots-wrap {
+  min-height: 60px;
+}
+
+.apt-slots-placeholder {
+  color    : var(--text-muted);
+  font-size: 13px;
+  margin   : 0;
+  padding  : 12px 0;
+}
+
+.apt-slots-grid {
+  display  : flex;
+  flex-wrap: wrap;
+  gap      : 8px;
+}
+
+.apt-slot {
+  padding      : 7px 14px;
+  font-size    : 13px;
+  font-weight  : 500;
+  border       : 1px solid var(--border);
+  border-radius: 7px;
+  background   : var(--surface);
+  color        : var(--text);
+  cursor       : pointer;
+  transition   : background .15s, border-color .15s, color .15s;
+  line-height  : 1;
+}
+
+.apt-slot:hover:not([disabled]) {
+  background  : var(--primary-light);
+  border-color: var(--primary);
+  color       : var(--primary-dark);
+}
+
+.apt-slot--selected {
+  background  : var(--primary) !important;
+  border-color: var(--primary) !important;
+  color       : white !important;
+}
+
+.apt-slot--disabled {
+  opacity: .4;
+  cursor : not-allowed;
+}
+
+.apt-slots-unavailable {
+  background   : var(--surface-2);
+  border       : 1px solid var(--border);
+  border-radius: 8px;
+  padding      : 14px 16px;
+  font-size    : 13px;
+  color        : var(--text-muted);
+  display      : flex;
+  flex-direction: column;
+  gap          : 4px;
+}
+
+/* Day hint */
+#aptDayHint {
+  font-size: 12px;
+  color    : var(--success);
+  margin   : 5px 0 0;
+}
+
+/* Submit button */
+.apt-submit-btn {
+  margin-top: 24px;
+  font-size : 15px;
+  padding   : 13px;
+}
+
+/* ── Right info panel ────────────────────────────────────── */
+.apt-info-panel {
+  display       : flex;
+  flex-direction: column;
+  gap           : 16px;
+}
+
+.apt-info-card { padding: 20px; }
+
+.apt-info-list {
+  list-style: none;
+  padding   : 0;
+  margin    : 0;
+  display   : flex;
+  flex-direction: column;
+  gap       : 10px;
+  font-size : 13px;
+  color     : var(--text-muted);
+}
+
+.apt-info-list li { line-height: 1.5; }
+
+/* My appointment items */
+.apt-my-item {
+  display        : flex;
+  justify-content: space-between;
+  align-items    : flex-start;
+  gap            : 10px;
+  padding        : 10px 0;
+  border-bottom  : 1px solid var(--border);
+}
+
+.apt-my-item:last-child { border-bottom: none; }
+
+.apt-my-info {
+  display       : flex;
+  flex-direction: column;
+  gap           : 2px;
+  flex          : 1;
+}
+
+/* Status badges */
+.apt-status {
+  font-size    : 11px;
+  font-weight  : 600;
+  padding      : 3px 8px;
+  border-radius: 20px;
+  white-space  : nowrap;
+  text-transform: capitalize;
+  flex-shrink  : 0;
+}
+
+.apt-status--pending   {
+  background: rgba(217,119,6,.12);
+  color     : var(--warning);
+}
+
+.apt-status--confirmed {
+  background: rgba(5,150,105,.12);
+  color     : var(--success);
+}
+
+.apt-status--cancelled {
+  background: rgba(220,38,38,.10);
+  color     : var(--error);
+}
+
+/* ── Success overlay ─────────────────────────────────────── */
+.apt-success-overlay {
+  display        : none;
+  position       : fixed;
+  inset          : 0;
+  background     : rgba(0,0,0,.55);
+  z-index        : 3000;
+  align-items    : center;
+  justify-content: center;
+  padding        : 20px;
+}
+
+.apt-success-overlay--show { display: flex; }
+
+.apt-success-box {
+  background   : var(--surface);
+  border-radius: 16px;
+  padding      : 40px 36px;
+  max-width    : 420px;
+  width        : 100%;
+  text-align   : center;
+  box-shadow   : var(--shadow-lg);
+  animation    : fadeUp .3s ease;
+}
+
+.apt-success-icon  { font-size: 48px; margin-bottom: 12px; line-height: 1; }
+
+.apt-success-title {
+  font-size    : 22px;
+  font-weight  : 700;
+  margin       : 0 0 10px;
+  color        : var(--text);
+}
+
+.apt-success-sub {
+  font-size    : 14px;
+  color        : var(--text-muted);
+  margin       : 0 0 24px;
+  line-height  : 1.7;
+}
+
+.apt-success-actions {
+  display  : flex;
+  gap      : 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.apt-badge-emergency {
+  display      : inline-block;
+  background   : rgba(220,38,38,.1);
+  color        : var(--error);
+  font-size    : 12px;
+  font-weight  : 600;
+  padding      : 3px 10px;
+  border-radius: 20px;
+  margin-top   : 6px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .apt-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .apt-info-panel {
+    order: -1;   /* show info panel above form on mobile */
+  }
+}
+
+@media (max-width: 500px) {
+  .apt-form-card { padding: 20px 16px; }
+  .apt-slot       { padding: 6px 10px; font-size: 12px; }
+}

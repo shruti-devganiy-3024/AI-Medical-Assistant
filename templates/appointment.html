@@ -1,0 +1,569 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Appointment — MedAssist AI</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="brand">🏥 MedAssist AI</div>
+    <button class="mobile-toggle" id="mobileToggle">☰</button>
+    <div class="nav-links">
+      <a href="/dashboard/"   data-page="dashboard">Dashboard</a>
+      <a href="/chat/"        data-page="chat">Chat</a>
+      <a href="/history/"     data-page="history">History</a>
+      <a href="/appointment/" data-page="appointment">Appointment</a>
+      <a href="#" id="logoutBtn">Logout</a>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="apt-wrap">
+
+      <!-- ================================================
+           LEFT: Booking Form
+           ================================================ -->
+      <div class="apt-form-card card">
+
+        <!-- Header -->
+        <div class="apt-form-header">
+          <h2 style="margin:0;">📅 Book Appointment</h2>
+          <p style="margin:6px 0 0; font-size:13px;">
+            Fill in your details and choose a doctor + time slot.
+          </p>
+        </div>
+
+        <!-- Error banner -->
+        <div id="aptError" class="alert alert-error"></div>
+
+        <!-- FORM -->
+        <form id="aptForm" novalidate>
+
+          <!-- ── Personal Info ─────────────────────── -->
+          <div class="apt-section-label">Personal Information</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="aptName">Full Name <span class="req">*</span></label>
+              <input id="aptName" type="text"
+                     placeholder="e.g. John Doe" autocomplete="name"/>
+            </div>
+            <div class="form-group">
+              <label for="aptPhone">Phone <span class="req">*</span></label>
+              <input id="aptPhone" type="tel"
+                     placeholder="e.g. 0300-1234567" autocomplete="tel"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="aptEmail">
+              Email
+              <span style="color:var(--text-muted);
+                           font-weight:400;">(optional)</span>
+            </label>
+            <input id="aptEmail" type="email"
+                   placeholder="e.g. john@example.com" autocomplete="email"/>
+          </div>
+
+          <!-- ── Symptoms ──────────────────────────── -->
+          <div class="apt-section-label">Symptoms</div>
+
+          <div class="form-group">
+            <label for="aptSymptoms">
+              What are you feeling?
+              <span class="req">*</span>
+            </label>
+            <textarea id="aptSymptoms" rows="2"
+                      placeholder="e.g. fever, cough, headache"></textarea>
+            <p class="apt-hint">
+              💡 Auto-filled from your chat — you can edit this.
+            </p>
+          </div>
+
+          <!-- ── Emergency ─────────────────────────── -->
+          <div class="apt-emergency-row">
+            <label class="apt-emergency-label">
+              <input type="checkbox" id="aptEmergency"/>
+              <span class="apt-emergency-box"></span>
+              <span class="apt-emergency-text">
+                🚨 This is an emergency
+                <small>Skip time slot restriction</small>
+              </span>
+            </label>
+          </div>
+
+          <!-- ── Doctor ────────────────────────────── -->
+          <div class="apt-section-label">Select Doctor</div>
+
+          <div class="form-group">
+            <label for="aptDoctor">Doctor <span class="req">*</span></label>
+            <select id="aptDoctor">
+              <option value="">— Choose a doctor —</option>
+            </select>
+          </div>
+
+          <!-- ── Date ──────────────────────────────── -->
+          <div class="form-group">
+            <label for="aptDate">
+              Preferred Date <span class="req">*</span>
+            </label>
+            <input id="aptDate" type="date"/>
+            <p class="apt-hint" id="aptDayHint"></p>
+          </div>
+
+          <!-- ── Time Slots ─────────────────────────── -->
+          <div class="form-group">
+            <label>Time Slot <span class="req">*</span></label>
+            <div id="aptSlots" class="apt-slots-wrap">
+              <p class="apt-slots-placeholder">
+                Select a doctor and date first.
+              </p>
+            </div>
+          </div>
+
+          <!-- Hidden selected slot -->
+          <input type="hidden" id="aptSelectedSlot"/>
+
+          <!-- ── Submit ────────────────────────────── -->
+          <button type="submit" class="btn btn-block apt-submit-btn"
+                  id="aptSubmitBtn">
+            <span id="aptSubmitText">Confirm Booking</span>
+          </button>
+
+        </form>
+      </div>
+      <!-- /apt-form-card -->
+
+      <!-- ================================================
+           RIGHT: Info panel
+           ================================================ -->
+      <div class="apt-info-panel">
+
+        <!-- What to expect -->
+        <div class="card apt-info-card">
+          <h3 style="margin-top:0;">ℹ️ What to Expect</h3>
+          <ul class="apt-info-list">
+            <li>📋 Your appointment will be set to <strong>Pending</strong></li>
+            <li>📞 The clinic will call you to confirm</li>
+            <li>🕐 Arrive 10 min early</li>
+            <li>💊 Bring any current medications</li>
+          </ul>
+        </div>
+
+        <!-- My appointments -->
+        <div class="card apt-info-card">
+          <h3 style="margin-top:0; margin-bottom:12px;">
+            📆 My Appointments
+          </h3>
+          <div id="myApts">
+            <p style="color:var(--text-muted); font-size:13px;">
+              Loading...
+            </p>
+          </div>
+        </div>
+
+      </div>
+      <!-- /apt-info-panel -->
+
+    </div>
+  </main>
+
+  <!-- =====================================================
+       SUCCESS OVERLAY
+       ===================================================== -->
+  <div id="aptSuccessOverlay" class="apt-success-overlay">
+    <div class="apt-success-box">
+      <div class="apt-success-icon">✅</div>
+      <h2 class="apt-success-title">Appointment Booked!</h2>
+      <p class="apt-success-sub" id="aptSuccessMsg"></p>
+      <div class="apt-success-actions">
+        <a href="/chat/" class="btn">Back to Chat</a>
+        <button class="btn btn-secondary"
+                onclick="closeSuccess()">
+          Book Another
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/script.js' %}"></script>
+  <script>
+  if (!requireAuth()) {}
+  setupNavbar('appointment');
+
+  /* ==========================================================
+     STATE
+     ========================================================== */
+  let doctors      = [];   // all doctors from API
+  let selectedSlot = '';   // "10:00"
+  let isEmergency  = false;
+
+  /* ==========================================================
+     DOM
+     ========================================================== */
+  const aptForm        = document.getElementById('aptForm');
+  const aptError       = document.getElementById('aptError');
+  const aptName        = document.getElementById('aptName');
+  const aptPhone       = document.getElementById('aptPhone');
+  const aptEmail       = document.getElementById('aptEmail');
+  const aptSymptoms    = document.getElementById('aptSymptoms');
+  const aptEmergency   = document.getElementById('aptEmergency');
+  const aptDoctor      = document.getElementById('aptDoctor');
+  const aptDate        = document.getElementById('aptDate');
+  const aptDayHint     = document.getElementById('aptDayHint');
+  const aptSlots       = document.getElementById('aptSlots');
+  const aptSelectedSlot = document.getElementById('aptSelectedSlot');
+  const aptSubmitBtn   = document.getElementById('aptSubmitBtn');
+  const aptSubmitText  = document.getElementById('aptSubmitText');
+  const myApts         = document.getElementById('myApts');
+
+  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const FULL_DAYS = ['Sunday','Monday','Tuesday',
+                     'Wednesday','Thursday','Friday','Saturday'];
+
+  /* ==========================================================
+     INIT: Pre-fill symptoms from chat sessionStorage
+     ========================================================== */
+  function prefillSymptoms() {
+    const symptoms = sessionStorage.getItem('symptomsFromChat') || '';
+    if (symptoms) {
+      aptSymptoms.value = symptoms;
+      sessionStorage.removeItem('symptomsFromChat');
+    }
+  }
+
+  /* ==========================================================
+     INIT: Set minimum date to today
+     ========================================================== */
+  function setMinDate() {
+    const today = new Date().toISOString().split('T')[0];
+    aptDate.min = today;
+    aptDate.value = today;   // default to today
+  }
+
+  /* ==========================================================
+     LOAD: Fetch doctors from API
+     ========================================================== */
+  async function loadDoctors() {
+    try {
+      const date = aptDate.value || '';
+      doctors    = await apiRequest(`/doctors/?date=${date}`);
+
+      // Populate doctor dropdown
+      aptDoctor.innerHTML = '<option value="">— Choose a doctor —</option>';
+      doctors.forEach(doc => {
+        const days = doc.available_days
+          .map(d => DAY_NAMES[(d + 1) % 7])
+          .join(', ');
+        const opt  = document.createElement('option');
+        opt.value       = doc.id;
+        opt.textContent = `${doc.name} — ${doc.specialization} (${days})`;
+        aptDoctor.appendChild(opt);
+      });
+    } catch (e) {
+      showToast('Could not load doctors: ' + e.message, 'error');
+    }
+  }
+
+  /* ==========================================================
+     RENDER: Time slots for selected doctor + date
+     ========================================================== */
+  async function renderSlots() {
+    const docId   = parseInt(aptDoctor.value);
+    const dateStr = aptDate.value;
+
+    selectedSlot = '';
+    aptSelectedSlot.value = '';
+
+    if (!docId || !dateStr) {
+      aptSlots.innerHTML =
+        '<p class="apt-slots-placeholder">Select a doctor and date first.</p>';
+      aptDayHint.textContent = '';
+      return;
+    }
+
+    const doc     = doctors.find(d => d.id === docId);
+    if (!doc) return;
+
+    // Check if doctor works on this day
+    const dayOfWeek = new Date(dateStr + 'T00:00:00').getDay();
+    // Convert: API uses 0=Mon, JS getDay() uses 0=Sun
+    const apiDay    = (dayOfWeek + 6) % 7;
+
+    if (!doc.available_days.includes(apiDay)) {
+      aptSlots.innerHTML = `
+        <div class="apt-slots-unavailable">
+          <span>😔</span>
+          <p>${doc.name} is not available on
+             ${FULL_DAYS[dayOfWeek]}s.</p>
+          <p style="font-size:12px; margin-top:4px;">
+            Available days:
+            ${doc.available_days
+                .map(d => FULL_DAYS[(d + 1) % 7])
+                .join(', ')}
+          </p>
+        </div>`;
+      aptDayHint.textContent = '';
+      return;
+    }
+
+    aptDayHint.textContent =
+      `✅ ${doc.name} is available on ${FULL_DAYS[dayOfWeek]}s.`;
+
+    // Re-fetch slots with selected date (to get booked status)
+    try {
+      const fresh = await apiRequest(`/doctors/?date=${dateStr}`);
+      const freshDoc = fresh.find(d => d.id === docId);
+      if (!freshDoc) return;
+
+      const now = new Date();
+
+      aptSlots.innerHTML = `
+        <div class="apt-slots-grid">
+          ${freshDoc.slots.map(slot => {
+            // Is this slot in the past? (for today's date)
+            const slotDt = new Date(`${dateStr}T${slot.time}:00`);
+            const isPast = !isEmergency && slotDt <= now;
+            const disabled = slot.is_booked || isPast;
+
+            let label = slot.time;
+            if (slot.is_booked) label += ' (Booked)';
+            else if (isPast)    label += ' (Past)';
+
+            return `
+              <button type="button"
+                      class="apt-slot ${disabled ? 'apt-slot--disabled' : ''}"
+                      data-time="${slot.time}"
+                      ${disabled ? 'disabled' : ''}>
+                ${label}
+              </button>`;
+          }).join('')}
+        </div>`;
+
+      // Slot click handler
+      aptSlots.querySelectorAll('.apt-slot:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Deselect all
+          aptSlots.querySelectorAll('.apt-slot').forEach(b =>
+            b.classList.remove('apt-slot--selected')
+          );
+          // Select this
+          btn.classList.add('apt-slot--selected');
+          selectedSlot          = btn.dataset.time;
+          aptSelectedSlot.value = selectedSlot;
+        });
+      });
+
+    } catch (e) {
+      showToast('Could not load slots: ' + e.message, 'error');
+    }
+  }
+
+  /* ==========================================================
+     SHOW / HIDE form error
+     ========================================================== */
+  function showError(msg) {
+    aptError.textContent = msg;
+    aptError.classList.add('show');
+    aptError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function clearError() {
+    aptError.textContent = '';
+    aptError.classList.remove('show');
+  }
+
+  /* ==========================================================
+     SUBMIT: Validate + book
+     ========================================================== */
+  aptForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const name     = aptName.value.trim();
+    const phone    = aptPhone.value.trim();
+    const symptoms = aptSymptoms.value.trim();
+    const docId    = parseInt(aptDoctor.value);
+    const dateStr  = aptDate.value;
+    const emergency = aptEmergency.checked;
+
+    // ── Client-side validation ──────────────────────────
+    if (!name) {
+      showError('Please enter your full name.');
+      aptName.focus();
+      return;
+    }
+    if (!phone) {
+      showError('Please enter your phone number.');
+      aptPhone.focus();
+      return;
+    }
+    if (!symptoms) {
+      showError('Please describe your symptoms.');
+      aptSymptoms.focus();
+      return;
+    }
+    if (!docId) {
+      showError('Please select a doctor.');
+      aptDoctor.focus();
+      return;
+    }
+    if (!dateStr) {
+      showError('Please select a date.');
+      aptDate.focus();
+      return;
+    }
+    if (!selectedSlot && !emergency) {
+      showError('Please select a time slot.');
+      aptSlots.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const doc = doctors.find(d => d.id === docId);
+    if (!doc) {
+      showError('Invalid doctor selected.');
+      return;
+    }
+
+    // ── Lock UI ─────────────────────────────────────────
+    aptSubmitBtn.disabled    = true;
+    aptSubmitText.innerHTML  =
+      '<div class="spinner"></div> Booking...';
+
+    // ── Call API ─────────────────────────────────────────
+    try {
+      const result = await apiRequest('/appointments/create/', {
+        method: 'POST',
+        body: JSON.stringify({
+          full_name:    name,
+          phone:        phone,
+          email:        aptEmail.value.trim(),
+          reason:       symptoms,
+          doctor_name:  doc.name,
+          date:         dateStr,
+          time:         selectedSlot || '00:00',
+          is_emergency: emergency,
+        }),
+      });
+
+      // ── Show success overlay ────────────────────────────
+      const timeLabel = emergency
+        ? 'Emergency — come at your earliest convenience'
+        : `${dateStr} at ${selectedSlot}`;
+
+      document.getElementById('aptSuccessMsg').innerHTML = `
+        <strong>${doc.name}</strong><br>
+        ${doc.specialization}<br>
+        🗓 ${timeLabel}<br>
+        ${emergency ? '<span class="apt-badge-emergency">🚨 Emergency</span>' : ''}
+      `;
+
+      document.getElementById('aptSuccessOverlay')
+              .classList.add('apt-success-overlay--show');
+
+      // Refresh my appointments list
+      loadMyAppointments();
+
+    } catch (err) {
+      showError(err.message || 'Booking failed. Please try again.');
+    } finally {
+      aptSubmitBtn.disabled   = false;
+      aptSubmitText.textContent = 'Confirm Booking';
+    }
+  });
+
+  /* ==========================================================
+     SUCCESS OVERLAY: close
+     ========================================================== */
+  function closeSuccess() {
+    document.getElementById('aptSuccessOverlay')
+            .classList.remove('apt-success-overlay--show');
+    // Reset form
+    aptForm.reset();
+    selectedSlot          = '';
+    aptSelectedSlot.value = '';
+    aptSlots.innerHTML    =
+      '<p class="apt-slots-placeholder">Select a doctor and date first.</p>';
+    aptDayHint.textContent = '';
+    clearError();
+    setMinDate();
+  }
+
+  /* ==========================================================
+     LOAD: My past appointments (right panel)
+     ========================================================== */
+  async function loadMyAppointments() {
+    try {
+      const data = await apiRequest('/appointments/');
+
+      if (!data || data.length === 0) {
+        myApts.innerHTML =
+          '<p style="color:var(--text-muted); font-size:13px;">' +
+          'No appointments yet.</p>';
+        return;
+      }
+
+      myApts.innerHTML = data.slice(0, 5).map(apt => `
+        <div class="apt-my-item">
+          <div class="apt-my-info">
+            <strong style="font-size:13px;">
+              ${escapeHtml(apt.doctor_name)}
+            </strong>
+            <span class="preview">
+              🗓 ${formatDate(apt.date)}
+            </span>
+            <span class="preview">
+              ${escapeHtml(apt.reason || '—')}
+            </span>
+          </div>
+          <span class="apt-status apt-status--${apt.status}">
+            ${apt.status}
+          </span>
+        </div>
+      `).join('');
+
+    } catch (e) {
+      myApts.innerHTML =
+        `<p style="color:var(--error); font-size:13px;">
+           ${escapeHtml(e.message)}
+         </p>`;
+    }
+  }
+
+  /* ==========================================================
+     EVENT LISTENERS
+     ========================================================== */
+  // Doctor or date changed → re-render slots
+  aptDoctor.addEventListener('change', renderSlots);
+  aptDate.addEventListener('change', async () => {
+    await loadDoctors();   // reload doctors with new date (for booked status)
+    await renderSlots();
+  });
+
+  // Emergency checkbox → re-render slots (un-disables past slots)
+  aptEmergency.addEventListener('change', () => {
+    isEmergency = aptEmergency.checked;
+    renderSlots();
+  });
+
+  /* ==========================================================
+     INIT
+     ========================================================== */
+  async function init() {
+    prefillSymptoms();
+    setMinDate();
+    await loadDoctors();
+    await loadMyAppointments();
+  }
+
+  init();
+  </script>
+
+</body>
+</html>

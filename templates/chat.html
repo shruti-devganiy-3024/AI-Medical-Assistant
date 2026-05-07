@@ -1,0 +1,653 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat — MedAssist AI</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+  <!-- =====================================================
+       NAVBAR
+       ===================================================== -->
+  <nav class="navbar">
+    <div class="brand">🏥 MedAssist AI</div>
+    <button class="mobile-toggle" id="mobileToggle">☰</button>
+    <div class="nav-links">
+      <a href="/dashboard/" data-page="dashboard">Dashboard</a>
+      <a href="/chat/"      data-page="chat">Chat</a>
+      <a href="/history/"   data-page="history">History</a>
+      <a href="/appointment/" data-page="appointment">Appointment</a>
+      <a href="#" id="logoutBtn">Logout</a>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="chat-layout">
+
+      <!-- =================================================
+           LEFT SIDEBAR — Chat History
+           ================================================= -->
+      <aside class="chat-sidebar">
+        <h3>
+          <span>💬 Chats</span>
+          <button class="btn btn-secondary" id="newChatBtn"
+                  style="padding:4px 10px; font-size:12px;">+ New</button>
+        </h3>
+        <div id="historyList">
+          <p class="sidebar-empty">Loading...</p>
+        </div>
+      </aside>
+
+      <!-- =================================================
+           RIGHT — Chat Window
+           ================================================= -->
+      <section class="chat-window">
+
+        <div class="chat-header">
+          <h3 style="margin:0;">🤖 AI Health Assistant</h3>
+          <p style="font-size:13px; margin-top:4px; color:var(--text-muted);">
+            Describe your symptoms — e.g.
+            <em>fever, cough, headache</em>
+          </p>
+        </div>
+
+        <!-- Messages area -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- Welcome bubble injected by JS -->
+        </div>
+
+        <!-- Input bar -->
+        <div class="chat-input">
+          <input
+            type="text"
+            id="messageInput"
+            placeholder="Enter symptoms (e.g., fever, cough, headache)"
+            autocomplete="off"
+          />
+          <button class="btn" id="sendBtn">
+            <span id="sendBtnText">Send</span>
+          </button>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <script src="{% static 'js/script.js' %}"></script>
+  <script>
+        /* ==========================================================
+        GUARD + NAVBAR
+        ========================================================== */
+        if (!requireAuth()) { /* redirected to login */ }
+        setupNavbar('chat');
+
+        /* ==========================================================
+        DOM ELEMENTS
+        ========================================================== */
+        const chatMessages = document.getElementById('chatMessages');
+        const historyList  = document.getElementById('historyList');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn      = document.getElementById('sendBtn');
+        const sendBtnText  = document.getElementById('sendBtnText');
+        const newChatBtn   = document.getElementById('newChatBtn');
+
+        /* ==========================================================
+        STATE
+        ========================================================== */
+        let currentChatId = null;   // which chat is open right now
+        let isSending     = false;  // prevents double-send
+        let lastSymptoms  = '';     // for booking flow pre-fill
+        let allChats      = [];     // local cache of sidebar chats
+
+        /* ==========================================================
+        CONSTANTS
+        ========================================================== */
+        const TYPING_DELAY_MS    = 700;
+        const ANALYZING_DELAY_MS = 800;
+        const LAST_CHAT_KEY      = 'lastOpenChatId'; // localStorage key
+
+        const WELCOME_TEXT =
+        '👋 Hello! I\'m your AI health assistant. ' +
+        'Describe your symptoms and I\'ll provide a possible analysis. ' +
+        'Remember — always consult a real doctor for an accurate diagnosis.';
+
+        /* ==========================================================
+        UTILITY: sleep
+        ========================================================== */
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        /* ==========================================================
+        RENDER: Add a message bubble
+        ========================================================== */
+        function addBubble(text, type, timestamp = null) {
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${type}`;
+
+        const timeStr = formatDate(timestamp || new Date());
+        const icon = type === 'bot' ? '🤖 ' : '';
+
+        // Render **bold** markdown for bot messages
+        const formattedText = type === 'bot'
+            ? escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>')
+            : escapeHtml(text);
+
+        bubble.innerHTML = `
+            <span class="bubble-text">${icon}${formattedText}</span>
+            <span class="time">${timeStr}</span>
+        `;
+
+        chatMessages.appendChild(bubble);
+        scrollToBottom();
+        return bubble;
+        }
+
+        /* ==========================================================
+        RENDER: Welcome bubble
+        ========================================================== */
+        function showWelcome() {
+        chatMessages.innerHTML = '';
+        addBubble(WELCOME_TEXT, 'bot');
+        }
+
+        /* ==========================================================
+        RENDER: Typing dots
+        ========================================================== */
+        function showTypingDots() {
+        removeTypingIndicator();
+        const typing = document.createElement('div');
+        typing.className = 'typing';
+        typing.id = 'typingIndicator';
+        typing.innerHTML = '<span></span><span></span><span></span>';
+        chatMessages.appendChild(typing);
+        scrollToBottom();
+        }
+
+        /* ==========================================================
+        RENDER: "🔍 Analyzing symptoms..."
+        ========================================================== */
+        function showAnalyzingText() {
+        const indicator = document.getElementById('typingIndicator');
+        if (!indicator) return;
+        indicator.classList.remove('typing');
+        indicator.classList.add('analyzing-indicator');
+        indicator.innerHTML =
+            '<span class="analyzing-text">🔍 Analyzing symptoms...</span>';
+        scrollToBottom();
+        }
+
+        /* ==========================================================
+        RENDER: Remove indicator
+        ========================================================== */
+        function removeTypingIndicator() {
+        const el = document.getElementById('typingIndicator');
+        if (el) el.remove();
+        }
+
+        /* ==========================================================
+        RENDER: Booking popup
+        ========================================================== */
+        function showBookingPrompt() {
+        // Remove any existing prompt
+        const existing = document.querySelector('.action-prompt');
+        if (existing) existing.remove();
+
+        const prompt = document.createElement('div');
+        prompt.className = 'action-prompt';
+        prompt.innerHTML = `
+            <div class="booking-prompt-inner">
+            <div class="booking-prompt-icon">📅</div>
+            <div class="booking-prompt-content">
+                <p class="booking-prompt-title">Book a Doctor Appointment?</p>
+                <p class="booking-prompt-sub">
+                Get a professional opinion based on your symptoms.
+                </p>
+            </div>
+            </div>
+            <div class="action-buttons">
+            <button class="btn booking-yes-btn" id="bookYes">
+                ✅ Yes, Book Now
+            </button>
+            <button class="btn btn-secondary booking-no-btn" id="bookNo">
+                ✖ No, Thanks
+            </button>
+            </div>
+        `;
+
+        chatMessages.appendChild(prompt);
+        scrollToBottom();
+
+        document.getElementById('bookYes').addEventListener('click', () => {
+            sessionStorage.setItem('symptomsFromChat', lastSymptoms);
+            window.location.href = '/appointment/';
+        });
+
+        document.getElementById('bookNo').addEventListener('click', () => {
+            // Animate out
+            prompt.style.transition = 'opacity 0.3s, transform 0.3s';
+            prompt.style.opacity    = '0';
+            prompt.style.transform  = 'translateY(-8px)';
+            setTimeout(() => {
+            prompt.remove();
+            addBubble(
+                "No problem! Feel free to describe more symptoms or ask anything else. 👍",
+                'bot'
+            );
+            }, 300);
+        });
+        }
+
+        /* ==========================================================
+        RENDER: Scroll to bottom
+        ========================================================== */
+        function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        /* ==========================================================
+        RENDER: Lock / unlock input
+        ========================================================== */
+        function setInputState(disabled) {
+        messageInput.disabled = disabled;
+        sendBtn.disabled      = disabled;
+        if (disabled) {
+            sendBtnText.innerHTML = '<div class="spinner"></div>';
+        } else {
+            sendBtnText.textContent = 'Send';
+            messageInput.focus();
+        }
+        }
+
+       /* ==========================================================
+        SIDEBAR: Build one sidebar item HTML
+        ========================================================== */
+        function buildSidebarItem(chat) {
+        const isActive = chat.id === currentChatId;
+        const title    = escapeHtml(chat.title || 'New Chat');
+        const date     = formatDate(chat.updated_at);
+        const preview  = escapeHtml(chat.last_message_preview || 'No messages yet');
+        const count    = chat.message_count || 0;
+
+        return `
+            <div class="history-item ${isActive ? 'active' : ''}"
+                data-chat-id="${chat.id}">
+
+            <div class="history-item-header">
+                <strong class="history-title" title="${title}">${title}</strong>
+
+                <button class="delete-chat-btn"
+                        data-chat-id="${chat.id}"
+                        title="Delete chat"
+                        aria-label="Delete chat">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                    <path d="M10 11v6"></path>
+                    <path d="M14 11v6"></path>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                </svg>
+                </button>
+            </div>
+
+            <div class="preview history-date">🕐 ${date}</div>
+
+            <div class="preview history-preview">
+                ${count > 0
+                ? `💬 ${count} msg${count !== 1 ? 's' : ''} — `
+                : ''}${preview}
+            </div>
+
+            </div>
+        `;
+        }
+
+        /* ==========================================================
+        SIDEBAR: Load all chat sessions
+        ========================================================== */
+        async function loadChatList() {
+        try {
+            const chats = await apiRequest('/chats/');
+            allChats = chats || [];
+
+            if (allChats.length === 0) {
+            historyList.innerHTML = `
+                <p class="sidebar-empty">
+                No chats yet.<br>
+                Click <strong>+ New</strong> to start! 💬
+                </p>`;
+            return;
+            }
+
+            // Build sidebar HTML
+            historyList.innerHTML = allChats.map(buildSidebarItem).join('');
+
+            // ── Click: open chat ─────────────────────────────────
+            historyList.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Ignore if delete button was clicked
+                if (e.target.closest('.delete-chat-btn')) return;
+                const id = parseInt(item.dataset.chatId);
+                openChat(id);
+            });
+            });
+
+            // ── Click: delete chat ───────────────────────────────
+            historyList.querySelectorAll('.delete-chat-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation(); // don't trigger openChat
+                const id = parseInt(btn.dataset.chatId);
+                await deleteChat(id);
+            });
+            });
+
+        } catch (err) {
+            historyList.innerHTML = `
+            <p class="sidebar-empty" style="color:var(--error);">
+                ⚠️ ${escapeHtml(err.message)}
+            </p>`;
+        }
+        }
+
+        /* ==========================================================
+        SIDEBAR: Update title of one item without full reload
+        ========================================================== */
+        function updateSidebarTitle(chatId, newTitle) {
+        const titleEl = historyList.querySelector(
+            `.history-item[data-chat-id="${chatId}"] .history-title`
+        );
+        if (titleEl) titleEl.textContent = newTitle;
+        }
+
+        /* ==========================================================
+        SIDEBAR: Highlight the active chat
+        ========================================================== */
+        function highlightActiveChat(chatId) {
+        historyList.querySelectorAll('.history-item').forEach(el => {
+            const isActive = parseInt(el.dataset.chatId) === chatId;
+            el.classList.toggle('active', isActive);
+            // Update active title color
+            const title = el.querySelector('.history-title');
+            if (title) {
+            title.style.color = isActive ? 'var(--primary-dark)' : '';
+            }
+        });
+        }
+
+        /* ==========================================================
+        CORE: Open a chat from sidebar
+        ========================================================== */
+        async function openChat(chatId) {
+        // Already open? Do nothing
+        if (chatId === currentChatId) return;
+
+        currentChatId = chatId;
+
+        // Remember for page refresh
+        localStorage.setItem(LAST_CHAT_KEY, chatId);
+
+        // Highlight in sidebar
+        highlightActiveChat(chatId);
+
+        // Show loading state in main area
+        chatMessages.innerHTML = `
+            <div style="text-align:center; color:var(--text-muted);
+                        padding:40px 20px; font-size:14px;">
+            ⏳ Loading conversation...
+            </div>`;
+
+        try {
+            const data = await apiRequest(`/chats/${chatId}/`);
+
+            chatMessages.innerHTML = '';
+
+            // Empty chat → show welcome
+            if (!data.messages || data.messages.length === 0) {
+            showWelcome();
+            return;
+            }
+
+            // Render every message in order (oldest → newest)
+            data.messages.forEach(msg => {
+            addBubble(msg.text, msg.sender, msg.created_at);
+            });
+
+            scrollToBottom();
+
+        } catch (err) {
+            chatMessages.innerHTML = '';
+            if (err.message.includes('not found') || err.message.includes('404')) {
+            // Chat was deleted from another tab / doesn't exist
+            showWelcome();
+            currentChatId = null;
+            localStorage.removeItem(LAST_CHAT_KEY);
+            await loadChatList();
+            } else {
+            addBubble(`⚠️ Could not load chat: ${err.message}`, 'bot');
+            }
+        }
+        }
+
+        /* ==========================================================
+        CORE: Create a new chat session
+        ========================================================== */
+        async function createNewChat() {
+        try {
+            const data = await apiRequest('/chats/', {
+            method: 'POST',
+            body: JSON.stringify({}),
+            });
+
+            currentChatId = data.id;
+
+            // Remember for page refresh
+            localStorage.setItem(LAST_CHAT_KEY, currentChatId);
+
+            // Clear messages + show welcome
+            showWelcome();
+
+            // Refresh sidebar (new chat appears at top)
+            await loadChatList();
+
+            return true;
+        } catch (err) {
+            showToast('Could not create a new chat. Please try again.', 'error');
+            return false;
+        }
+        }
+
+        /* ==========================================================
+        CORE: Delete a chat
+        ========================================================== */
+        async function deleteChat(chatId) {
+        // Confirm before deleting
+        const confirmed = window.confirm(
+            'Are you sure you want to delete this chat? This cannot be undone.'
+        );
+        if (!confirmed) return;
+
+        try {
+            await apiRequest(`/chats/${chatId}/`, { method: 'DELETE' });
+
+            showToast('Chat deleted.', 'success');
+
+            // If deleted chat was open → clear main area
+            if (chatId === currentChatId) {
+            currentChatId = null;
+            localStorage.removeItem(LAST_CHAT_KEY);
+            showWelcome();
+            }
+
+            // Refresh sidebar
+            await loadChatList();
+
+            // If there are other chats, open the most recent one
+            if (allChats.length > 0) {
+            const remaining = allChats.filter(c => c.id !== chatId);
+            if (remaining.length > 0 && !currentChatId) {
+                await openChat(remaining[0].id);
+            }
+            }
+
+        } catch (err) {
+            showToast(`Could not delete chat: ${err.message}`, 'error');
+        }
+        }
+
+        /* ==========================================================
+        CORE: Send a message
+        ========================================================== */
+        async function sendMessage() {
+        if (isSending) return;
+
+        const rawMessage = messageInput.value.trim();
+
+        if (!rawMessage) {
+            showToast('Please describe your symptoms first.', 'error');
+            messageInput.focus();
+            return;
+        }
+
+        // No active chat → create one automatically
+        if (!currentChatId) {
+            const created = await createNewChat();
+            if (!created) return;
+        }
+
+        // ── Lock UI ─────────────────────────────────────────────
+        isSending    = true;
+        lastSymptoms = rawMessage;
+        messageInput.value = '';
+        setInputState(true);
+
+        // ── Show user bubble ─────────────────────────────────────
+        addBubble(rawMessage, 'user');
+
+        // ── Show typing dots ─────────────────────────────────────
+        showTypingDots();
+
+        // ── Wait 700ms ───────────────────────────────────────────
+        await sleep(TYPING_DELAY_MS);
+
+        // ── Switch to "🔍 Analyzing symptoms..." ─────────────────
+        showAnalyzingText();
+
+        // ── Call API + enforce minimum display time ───────────────
+        let apiData  = null;
+        let apiError = null;
+
+        await Promise.all([
+            apiRequest(`/chats/${currentChatId}/messages/`, {
+            method: 'POST',
+            body: JSON.stringify({ message: rawMessage }),
+            })
+            .then(data  => { apiData  = data; })
+            .catch(err  => { apiError = err;  }),
+
+            sleep(ANALYZING_DELAY_MS),
+        ]);
+
+        // ── Remove indicator ─────────────────────────────────────
+        removeTypingIndicator();
+
+        // ── Handle error ─────────────────────────────────────────
+        if (apiError) {
+            addBubble(
+            `⚠️ ${apiError.message || 'Something went wrong. Please try again.'}`,
+            'bot'
+            );
+            showToast(apiError.message || 'Server error', 'error');
+            setInputState(false);
+            isSending = false;
+            return;
+        }
+
+        // ── Show bot reply ────────────────────────────────────────
+        if (apiData && apiData.bot_message) {
+            addBubble(
+            apiData.bot_message.text,
+            'bot',
+            apiData.bot_message.created_at
+            );
+
+            // Update sidebar title live
+            if (apiData.chat_title) {
+            updateSidebarTitle(currentChatId, apiData.chat_title);
+            }
+
+            // Smart booking popup
+            if (apiData.show_booking_popup) {
+            setTimeout(showBookingPrompt, 400);
+            }
+        }
+
+        // ── Refresh sidebar (re-sort, update preview + count) ─────
+        await loadChatList();
+        highlightActiveChat(currentChatId);
+
+        // ── Unlock input ──────────────────────────────────────────
+        setInputState(false);
+        isSending = false;
+        }
+
+        /* ==========================================================
+        EVENT LISTENERS
+        ========================================================== */
+        newChatBtn.addEventListener('click', async () => {
+        if (isSending) return; // don't allow during send
+        await createNewChat();
+        messageInput.focus();
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !isSending) sendMessage();
+        });
+
+        /* ==========================================================
+        INIT: Page load
+        ========================================================== */
+        async function init() {
+        // Show welcome while loading
+        showWelcome();
+
+        // Load sidebar
+        await loadChatList();
+
+        // ── Check if a specific chatId was passed via URL ────────
+        // e.g. /chat/?chatId=5  (coming from history page)
+        const urlParams  = new URLSearchParams(window.location.search);
+        const urlChatId  = parseInt(urlParams.get('chatId'));
+
+        if (urlChatId && allChats.some(c => c.id === urlChatId)) {
+            // Open the specific chat from URL
+            await openChat(urlChatId);
+
+        } else {
+            // Normal load — try to reopen last chat
+            const lastChatId = parseInt(localStorage.getItem(LAST_CHAT_KEY));
+
+            if (lastChatId && allChats.some(c => c.id === lastChatId)) {
+            await openChat(lastChatId);
+            } else if (allChats.length > 0) {
+            await openChat(allChats[0].id);
+            } else {
+            // No chats at all
+            showWelcome();
+            }
+        }
+
+        messageInput.focus();
+        }
+
+        init();
+    </script>
+</body>
+</html>

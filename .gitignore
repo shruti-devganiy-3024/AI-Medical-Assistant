@@ -1,0 +1,87 @@
+# ===============================
+# 🐍 Python
+# ===============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ===============================
+# 🌐 Django
+# ===============================
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# ===============================
+# 🔐 Environment Variables
+# ===============================
+.env
+.env.*
+!.env.example
+
+# ===============================
+# 🧪 Virtual Environment
+# ===============================
+venv/
+env/
+ENV/
+.venv/
+
+# ===============================
+# 🧠 ML / Data (optional control)
+# ===============================
+# Uncomment if model is large
+# *.pkl
+
+# ===============================
+# 🧾 VS Code / IDE
+# ===============================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ===============================
+# 💻 OS Files
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# 📦 Node (if frontend builds later)
+# ===============================
+node_modules/
+dist/
+build/
+
+# ===============================
+# 📁 Temporary / Cache
+# ===============================
+*.tmp
+*.temp
+.cache/
+.pytest_cache/
+
+# ===============================
+# 🔥 Secrets / Keys
+# ===============================
+secret.key
+*.pem
+*.crt
+
+# ===============================
+# 📊 Coverage Reports
+# ===============================
+htmlcov/
+.coverage
+coverage.xml
+
+# ===============================
+# 🧱 Migrations (OPTIONAL)
+# ===============================
+# If you want clean repo:
+# **/migrations/*
+# !**/migrations/__init__.py

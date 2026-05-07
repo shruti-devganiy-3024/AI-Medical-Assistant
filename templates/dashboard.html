@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — MedAssist AI</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+  <!-- ===========================================
+       NAVBAR
+       =========================================== -->
+  <nav class="navbar">
+    <div class="brand">🏥 MedAssist AI</div>
+    <button class="mobile-toggle" id="mobileToggle">☰</button>
+    <div class="nav-links">
+      <a href="/dashboard/" data-page="dashboard">Dashboard</a>
+      <a href="/chat/" data-page="chat">Chat</a>
+      <a href="/history/" data-page="history">History</a>
+      <a href="/appointment/" data-page="appointment">Appointment</a>
+      <a href="#" id="logoutBtn">Logout</a>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- ===========================================
+         HERO SECTION
+         =========================================== -->
+    <section class="hero">
+      <h1 id="welcomeMsg">Welcome back! 👋</h1>
+      <p>Get instant AI-powered health guidance and book appointments with ease.</p>
+      <a href="/chat/" class="btn btn-large">
+        💬 Ask AI about your health
+      </a>
+    </section>
+
+    <!-- ===========================================
+         ABOUT US
+         =========================================== -->
+    <section class="card">
+      <h2>About MedAssist Hospital</h2>
+      <p style="margin-bottom:10px;">
+        MedAssist is a state-of-the-art healthcare facility committed to providing
+        compassionate, comprehensive care powered by cutting-edge AI technology.
+        With over 25 years of clinical excellence, our team of board-certified
+        specialists serves thousands of patients every year.
+      </p>
+      <p>
+        Our AI-powered symptom checker helps you get instant preliminary assessments,
+        but never replaces professional medical advice. Always consult our doctors
+        for accurate diagnosis and treatment.
+      </p>
+    </section>
+
+    <!-- ===========================================
+         SERVICES
+         =========================================== -->
+    <section>
+      <h2 style="margin-bottom:14px;">Our Services</h2>
+      <div class="grid-3">
+        <div class="service-card">
+          <div class="service-icon">🩺</div>
+          <h3>General Consultation</h3>
+          <p>Comprehensive health checkups by experienced general physicians.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">❤️</div>
+          <h3>Cardiology</h3>
+          <p>Advanced heart care, ECG, and preventive cardiac screening.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🧬</div>
+          <h3>Dermatology</h3>
+          <p>Expert skin, hair, and nail treatments with modern diagnostics.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🤖</div>
+          <h3>AI Symptom Checker</h3>
+          <p>Instant disease prediction using machine learning algorithms.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">📅</div>
+          <h3>Easy Booking</h3>
+          <p>Book online appointments in seconds with your preferred doctor.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🚑</div>
+          <h3>24/7 Emergency</h3>
+          <p>Round-the-clock emergency services with rapid response teams.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===========================================
+         CONTACT
+         =========================================== -->
+    <section class="card" style="margin-top:24px;">
+      <h2>Contact Us</h2>
+      <div class="contact-row">
+        <span style="font-size:20px;">📍</span>
+        <div>
+          <strong>Address</strong>
+          <p style="font-size:14px;">123 Wellness Avenue, MediCity, 56789</p>
+        </div>
+      </div>
+      <div class="contact-row">
+        <span style="font-size:20px;">📞</span>
+        <div>
+          <strong>Phone</strong>
+          <p style="font-size:14px;">+1 (555) 123-4567</p>
+        </div>
+      </div>
+      <div class="contact-row">
+        <span style="font-size:20px;">✉️</span>
+        <div>
+          <strong>Email</strong>
+          <p style="font-size:14px;">care@medassist.example</p>
+        </div>
+      </div>
+      <div class="contact-row">
+        <span style="font-size:20px;">⏰</span>
+        <div>
+          <strong>Hours</strong>
+          <p style="font-size:14px;">Mon–Sat: 9 AM – 9 PM | Emergency: 24/7</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="{% static 'js/script.js' %}"></script>
+  <script>
+    // Protect this page
+    if (!requireAuth()) { /* redirected */ }
+
+    // Setup navbar
+    setupNavbar('dashboard');
+
+    // Personalized greeting
+    document.getElementById('welcomeMsg').textContent =
+      `Welcome back, ${getUsername()}! 👋`;
+  </script>
+</body>
+</html>
