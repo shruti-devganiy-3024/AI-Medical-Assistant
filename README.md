@@ -292,6 +292,12 @@ This project is licensed under the MIT License see the LICENSE file for details.
 
 ---
 
-## ⭐ If you found this project helpful, please give it a star! ⭐
 
-Made with ❤️ and ☕ by Shruti Devganiya
+<div align="center">
+
+  <strong>Made with ❤️ and ☕ by Shruti Devganiya</strong>
+
+  <p>⭐ Star this repo if you found it useful!</p>
+
+  
+</div>
