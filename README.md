@@ -21,7 +21,7 @@
 
 **AI Medical Assistant** is a full-stack web application built with **Django** and powered by **OpenAI's GPT API**. It allows patients to describe their symptoms, receive AI-driven preliminary health analysis, and book appointments with doctors — all through a clean, modern, dual-theme interface.
 
-> ⚠️ **Disclaimer:** This application provides preliminary AI analysis only. It does **not** replace professional medical advice. Always consult a licensed doctor for accurate diagnosis and treatment.
+> ⚠️ **Disclaimer:** This application provides preliminary AI analysis only. It does **not** replace professional medical advice. Always consult a licensed doctor for accurate diagnosis and treatment
 
 ---
 
